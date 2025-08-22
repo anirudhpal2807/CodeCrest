@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+@plugin "daisyui";
+
+:root{
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  margin: auto;
+}
+
+/* Smooth scrolling for the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Matrix theme custom styles with organized colors */
+:root {
+  /* Matrix Color Variables */
+  --matrix-primary: #00ff9f;
+  --matrix-primary-light: #4fffb0;
+  --matrix-primary-dark: #00cc7f;
+  --matrix-secondary: #00d4ff;
+  --matrix-bg-primary: #0a0e0a;
+  --matrix-bg-secondary: #0f1b0f;
+  --matrix-bg-tertiary: #15271a;
+  --matrix-text-primary: #00ff9f;
+  --matrix-text-secondary: #4fffb0;
+  --matrix-text-muted: rgba(0, 255, 159, 0.6);
+  --matrix-border: rgba(0, 255, 159, 0.3);
+  --matrix-glow: rgba(0, 255, 159, 0.5);
+}
+
+body {
+  background-color: var(--matrix-bg-primary);
+  color: var(--matrix-text-primary);
+  font-family: 'JetBrains Mono', 'Space Grotesk', 'Inter', monospace;
+}
+
+/* Custom selection colors */
+::selection {
+  background-color: rgba(0, 255, 159, 0.3);
+  color: var(--matrix-text-primary);
+}
+
+::-moz-selection {
+  background-color: rgba(0, 255, 159, 0.3);
+  color: var(--matrix-text-primary);
+}
+
+/* Matrix scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--matrix-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--matrix-glow);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 159, 0.8);
+}
+
+/* Matrix glow utilities */
+.matrix-glow {
+  box-shadow: 0 0 10px var(--matrix-glow);
+}
+
+.matrix-glow-strong {
+  box-shadow: 0 0 20px rgba(0, 255, 159, 0.8);
+}
+
+.matrix-text-glow {
+  text-shadow: 0 0 10px var(--matrix-glow);
+}
