@@ -1,26 +1,48 @@
+// {
+//   "version": 2,
+//   "builds": [
+//     {
+//       "src": "src/index.js",
+//       "use": "@vercel/node"
+//     }
+//   ],
+//   "routes": [
+//     {
+//       "src": "/(.*)",
+//       "dest": "src/index.js"
+//     }
+//   ],
+//   "env": {
+//     "MONGODB_URI": "@mongodb_uri",
+//     "JWT_KEY": "@jwt_key",
+//     "JUDGE0_KEY": "@judge0_key",
+//     "REDIS_URL": "@redis_url"
+//   },
+//   "functions": {
+//     "src/index.js": {
+//       "maxDuration": 30
+//     }
+//   }
+// }
+
 {
   "version": 2,
   "builds": [
     {
-      "src": "src/index.js",
-      "use": "@vercel/node"
+      "src": "vite.config.js",
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "src/index.js"
+      "dest": "/index.html"
     }
   ],
   "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_KEY": "@jwt_key",
-    "JUDGE0_KEY": "@judge0_key",
-    "REDIS_URL": "@redis_url"
-  },
-  "functions": {
-    "src/index.js": {
-      "maxDuration": 30
-    }
+    "VITE_MONGODB_URI": "@mongodb_uri",
+    "VITE_JWT_KEY": "@jwt_key",
+    "VITE_JUDGE0_KEY": "@judge0_key",
+    "VITE_REDIS_URL": "@redis_url"
   }
 }
