@@ -10,8 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "build": "echo 'Build completed'",
-    "postinstall": "npm rebuild bcrypt --build-from-source || true"
+    "build": "echo 'Build completed'"
   },
   "keywords": [],
   "author": "",
@@ -20,7 +19,7 @@
   "dependencies": {
     "@google/genai": "^1.3.0",
     "axios": "^1.9.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cloudinary": "^2.6.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
