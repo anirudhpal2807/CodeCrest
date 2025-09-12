@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: codec-rest-backend
+    rootDir: backend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_KEY
+        sync: false
+      - key: JUDGE0_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+
