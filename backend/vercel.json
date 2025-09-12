@@ -29,20 +29,26 @@
   "version": 2,
   "builds": [
     {
-      "src": "vite.config.js",
-      "use": "@vercel/static-build"
+      "src": "src/index.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "src/index.js"
     }
   ],
   "env": {
-    "VITE_MONGODB_URI": "@mongodb_uri",
-    "VITE_JWT_KEY": "@jwt_key",
-    "VITE_JUDGE0_KEY": "@judge0_key",
-    "VITE_REDIS_URL": "@redis_url"
+    "MONGODB_URI": "@mongodb_uri",
+    "JWT_KEY": "@jwt_key",
+    "JUDGE0_KEY": "@judge0_key",
+    "REDIS_URL": "@redis_url",
+    "CORS_ORIGIN": "@cors_origin"
+  },
+  "functions": {
+    "src/index.js": {
+      "maxDuration": 30
+    }
   }
 }
