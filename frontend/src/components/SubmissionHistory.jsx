@@ -11,12 +11,28 @@ const SubmissionHistory = ({ problemId }) => {
     const fetchSubmissions = async () => {
       try {
         setLoading(true);
-        const response = await axiosClient.get(`/problem/submittedProblem/${problemId}`);
-        setSubmissions(response.data);
         setError(null);
+        
+        const response = await axiosClient.get(`/problem/submittedProblem/${problemId}`);
+        
+        // Handle both old format (array) and new format (object with submissions property)
+        let submissionsData = [];
+        
+        if (Array.isArray(response.data)) {
+          submissionsData = response.data;
+        } else if (response.data && response.data.submissions) {
+          submissionsData = response.data.submissions;
+        } else {
+          submissionsData = [];
+        }
+        
+        // Ensure submissionsData is always an array
+        setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
+        
       } catch (err) {
-        setError('Failed to fetch submission history');
-        console.error(err);
+        console.error('Submission fetch error:', err);
+        setError('Failed to fetch submission history. Please try again.');
+        setSubmissions([]); // Ensure it's always an array even on error
       } finally {
         setLoading(false);
       }
@@ -95,7 +111,7 @@ const SubmissionHistory = ({ problemId }) => {
                 </tr>
               </thead>
               <tbody>
-                {submissions.map((sub, index) => (
+                {Array.isArray(submissions) && submissions.map((sub, index) => (
                   <tr key={sub._id}>
                     <td>{index + 1}</td>
                     <td className="font-mono">{sub.language}</td>
@@ -124,7 +140,7 @@ const SubmissionHistory = ({ problemId }) => {
           </div>
 
           <p className="mt-4 text-sm text-gray-500">
-            Showing {submissions.length} submissions
+            Showing {Array.isArray(submissions) ? submissions.length : 0} submissions
           </p>
         </>
       )}

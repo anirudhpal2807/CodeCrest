@@ -17,21 +17,18 @@ function ChatAi({problem}) {
     }, [messages]);
 
     const onSubmit = async (data) => {
-        
         setMessages(prev => [...prev, { role: 'user', parts:[{text: data.message}] }]);
         reset();
 
         try {
-            
             const response = await axiosClient.post("/ai/chat", {
-                messages:messages,
-                title:problem.title,
-                description:problem.description,
-                testCases: problem.visibleTestCases,
-                startCode:problem.startCode
+                messages: [...messages, { role: 'user', parts:[{text: data.message}] }],
+                title: problem?.title || "General Question",
+                description: problem?.description || "No specific problem context",
+                testCases: problem?.visibleTestCases || [],
+                startCode: problem?.startCode || ""
             });
 
-           
             setMessages(prev => [...prev, { 
                 role: 'model', 
                 parts:[{text: response.data.message}] 
@@ -40,7 +37,7 @@ function ChatAi({problem}) {
             console.error("API Error:", error);
             setMessages(prev => [...prev, { 
                 role: 'model', 
-                parts:[{text: "Error from AI Chatbot"}]
+                parts:[{text: "Sorry, I'm having trouble connecting right now. Please try again later."}]
             }]);
         }
     };

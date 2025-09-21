@@ -60,15 +60,29 @@ const submitCode = async (req,res)=>{
       } catch (error) {
         console.error('Judge0 submission error:', error.message);
         
+        let statusCode = 503;
+        let errorMessage = 'Code execution service is temporarily unavailable. Please try again later.';
+        
+        if (error.message.includes('rate limit')) {
+          statusCode = 429;
+          errorMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+        } else if (error.message.includes('timeout')) {
+          statusCode = 408;
+          errorMessage = 'Code execution timeout. Please try with simpler code or try again later.';
+        } else if (error.message.includes('API service temporarily unavailable')) {
+          statusCode = 503;
+          errorMessage = 'Code execution service is temporarily unavailable. Please try again later.';
+        }
+        
         // Update submission with error status
         submittedResult.status = 'error';
         submittedResult.errorMessage = error.message;
         await submittedResult.save();
         
-        return res.status(503).json({
+        return res.status(statusCode).json({
           accepted: false,
           error: error.message,
-          message: 'Code execution service is temporarily unavailable. Please try again later.'
+          message: errorMessage
         });
       }
     }
@@ -150,6 +164,15 @@ const runCode = async(req,res)=>{
 
   //    Fetch the problem from database
      const problem =  await Problem.findById(problemId);
+     
+     if(!problem){
+       return res.status(404).json({
+         success: false,
+         error: "Problem not found",
+         message: "The requested problem does not exist."
+       });
+     }
+     
   //    testcases(Hidden)
      if(language==='cpp')
        language='c++'
@@ -157,6 +180,17 @@ const runCode = async(req,res)=>{
   //    Judge0 code ko submit karna hai
 
   const languageId = getLanguageById(language);
+  
+  if(!languageId){
+    return res.status(400).json({
+      success: false,
+      error: "Unsupported language",
+      message: `Language '${language}' is not supported.`
+    });
+  }
+
+  console.log('Problem visibleTestCases:', problem.visibleTestCases);
+  console.log('Language:', language, 'LanguageId:', languageId);
 
   const submissions = (problem.visibleTestCases || []).map((testcase)=>({
       source_code:code,
@@ -164,6 +198,8 @@ const runCode = async(req,res)=>{
       stdin: testcase.input,
       expected_output: testcase.output
   }));
+  
+  console.log('Submissions array length:', submissions.length);
 
   let submitResult = [];
   let resultToken = [];
@@ -171,17 +207,48 @@ const runCode = async(req,res)=>{
 
   if (submissions.length > 0) {
     try {
+      console.log('Submitting to Judge0...');
       submitResult = await submitBatch(submissions);
+      console.log('Judge0 submission result:', submitResult);
+      
       resultToken = Array.isArray(submitResult) ? submitResult.map((value)=> value.token) : [];
-      testResult = resultToken.length>0 ? await submitToken(resultToken) : [];
+      console.log('Result tokens:', resultToken);
+      
+      if(resultToken.length > 0) {
+        console.log('Polling for results...');
+        testResult = await submitToken(resultToken);
+        console.log('Test results:', testResult);
+      }
     } catch (error) {
       console.error('Judge0 run code error:', error.message);
-      return res.status(503).json({
+      
+      let statusCode = 503;
+      let errorMessage = 'Code execution service is temporarily unavailable. Please try again later.';
+      
+      if (error.message.includes('rate limit')) {
+        statusCode = 429;
+        errorMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+      } else if (error.message.includes('timeout')) {
+        statusCode = 408;
+        errorMessage = 'Code execution timeout. Please try with simpler code or try again later.';
+      } else if (error.message.includes('API service temporarily unavailable')) {
+        statusCode = 503;
+        errorMessage = 'Code execution service is temporarily unavailable. Please try again later.';
+      }
+      
+      return res.status(statusCode).json({
         success: false,
         error: error.message,
-        message: 'Code execution service is temporarily unavailable. Please try again later.'
+        message: errorMessage
       });
     }
+  } else {
+    console.log('No test cases found for this problem');
+    return res.status(400).json({
+      success: false,
+      error: "No test cases",
+      message: "This problem has no visible test cases to run against."
+    });
   }
 
    let testCasesPassed = 0;

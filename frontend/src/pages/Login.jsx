@@ -165,8 +165,8 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
       <div className="card w-full max-w-sm bg-white dark:bg-gray-800 shadow-2xl rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="card-body p-8">
-          <h2 className="text-4xl font-bold text-center text-gray-800 dark:text-white mb-2">Welcome Back</h2>
-          <p className="text-center text-gray-500 dark:text-gray-400 mb-6">Log in to your account</p>
+          <h2 className="text-4xl font-bold text-center text-gray-800 dark:text-white mb-2">CodeCrest</h2>
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-6">Welcome back! Log in to your account</p>
 
           {/* Display global Redux error if present */}
           {error && (

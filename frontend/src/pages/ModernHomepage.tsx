@@ -44,6 +44,10 @@ const ModernHomepage: React.FC = () => {
     status: 'all'
   });
 
+  // Debug search query
+  console.log('Current search query:', searchQuery);
+  console.log('All search params:', Object.fromEntries(searchParams.entries()));
+
 
 
   useEffect(() => {
@@ -52,6 +56,7 @@ const ModernHomepage: React.FC = () => {
       try {
         // Always fetch problems
         const problemsResponse = await axiosClient.get('/problem/getAllProblem');
+        console.log('Problems fetched:', problemsResponse.data);
         setProblems(problemsResponse.data || []);
 
         // Only fetch solved problems if user is authenticated
@@ -107,9 +112,18 @@ const ModernHomepage: React.FC = () => {
     
     // Add search functionality
     const searchMatch = !searchQuery || 
-      problem.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      problem.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      problem.tags?.toLowerCase().includes(searchQuery.toLowerCase());
+      (problem.title && problem.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (problem.description && problem.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (problem.tags && problem.tags.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (problem.problemTitle && problem.problemTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (problem.problemDescription && problem.problemDescription.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Debug logging
+    if (searchQuery) {
+      console.log('Search query:', searchQuery);
+      console.log('Problem title:', problem.title);
+      console.log('Search match:', searchMatch);
+    }
     
     return difficultyMatch && tagMatch && statusMatch && searchMatch;
   });

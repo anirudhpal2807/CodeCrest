@@ -99,9 +99,11 @@ const ProblemPage = () => {
       if (error.response?.status === 503) {
         errorMessage = error.response.data?.message || 'Code execution service is temporarily unavailable. Please try again later.';
       } else if (error.response?.status === 429) {
-        errorMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+        errorMessage = error.response.data?.message || 'Rate limit exceeded. Please wait a few minutes before trying again.';
+      } else if (error.response?.status === 408) {
+        errorMessage = error.response.data?.message || 'Code execution timeout. Please try with simpler code or try again later.';
       } else if (error.response?.status === 400) {
-        errorMessage = error.response.data || 'Invalid request. Please check your code and try again.';
+        errorMessage = error.response.data?.message || 'Invalid request. Please check your code and try again.';
       }
       
       setRunResult({
@@ -137,9 +139,11 @@ const ProblemPage = () => {
       if (error.response?.status === 503) {
         errorMessage = error.response.data?.message || 'Code execution service is temporarily unavailable. Please try again later.';
       } else if (error.response?.status === 429) {
-        errorMessage = 'Rate limit exceeded. Please wait a few minutes before trying again.';
+        errorMessage = error.response.data?.message || 'Rate limit exceeded. Please wait a few minutes before trying again.';
+      } else if (error.response?.status === 408) {
+        errorMessage = error.response.data?.message || 'Code execution timeout. Please try with simpler code or try again later.';
       } else if (error.response?.status === 400) {
-        errorMessage = error.response.data || 'Invalid request. Please check your code and try again.';
+        errorMessage = error.response.data?.message || 'Invalid request. Please check your code and try again.';
       }
       
       setSubmitResult({

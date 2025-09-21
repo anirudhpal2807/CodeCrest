@@ -35,20 +35,21 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-base-200"> {/* Added a light bg for contrast */}
-      <div className="card w-96 bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title justify-center text-3xl mb-6">Leetcode</h2> {/* Added mb-6 for spacing */}
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+      <div className="card w-full max-w-sm bg-white dark:bg-gray-800 shadow-2xl rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="card-body p-8">
+          <h2 className="text-4xl font-bold text-center text-gray-800 dark:text-white mb-2">CodeCrest</h2>
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-6">Create your account</p>
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* First Name Field */}
-            <div className="form-control">
+            <div className="form-control mb-4">
               <label className="label">
-                <span className="label-text">First Name</span>
+                <span className="label-text text-gray-700 dark:text-gray-300">First Name</span>
               </label>
               <input
                 type="text"
                 placeholder="John"
-                className={`input input-bordered w-full ${errors.firstName ? 'input-error' : ''}`} 
+                className={`input input-bordered w-full transition-colors duration-200 ${errors.firstName ? 'input-error' : 'focus:input-primary'}`} 
                 {...register('firstName')}
               />
               {errors.firstName && (
@@ -57,14 +58,14 @@ function Signup() {
             </div>
 
             {/* Email Field */}
-            <div className="form-control mt-4">
+            <div className="form-control mb-4">
               <label className="label">
-                <span className="label-text">Email</span>
+                <span className="label-text text-gray-700 dark:text-gray-300">Email</span>
               </label>
               <input
                 type="email"
                 placeholder="john@example.com"
-                className={`input input-bordered w-full ${errors.emailId ? 'input-error' : ''}`} // Ensure w-full for consistency
+                className={`input input-bordered w-full transition-colors duration-200 ${errors.emailId ? 'input-error' : 'focus:input-primary'}`}
                 {...register('emailId')}
               />
               {errors.emailId && (
@@ -73,23 +74,22 @@ function Signup() {
             </div>
 
             {/* Password Field with Toggle */}
-            <div className="form-control mt-4">
+            <div className="form-control mb-4">
               <label className="label">
-                <span className="label-text">Password</span>
+                <span className="label-text text-gray-700 dark:text-gray-300">Password</span>
               </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  // Added pr-10 (padding-right) to make space for the button
-                  className={`input input-bordered w-full pr-10 ${errors.password ? 'input-error' : ''}`}
+                  className={`input input-bordered w-full pr-12 transition-colors duration-200 ${errors.password ? 'input-error' : 'focus:input-primary'}`}
                   {...register('password')}
                 />
                 <button
                   type="button"
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700" // Added transform for better centering, styling
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"} // Accessibility
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,22 +109,29 @@ function Signup() {
             </div>
 
             {/* Submit Button */}
-            <div className="form-control mt-8 flex justify-center"> 
+            <div className="form-control mt-6">
               <button
                 type="submit"
-                className={`btn btn-primary ${loading ? 'loading' : ''}`}
+                className="btn btn-primary w-full transition-all duration-300"
                 disabled={loading}
               >
-                {loading ? 'Signing Up...' : 'Sign Up'}
+                {loading ? (
+                  <span className="flex items-center">
+                    <span className="loading loading-spinner mr-2"></span>
+                    Signing Up...
+                  </span>
+                ) : (
+                  'Sign Up'
+                )}
               </button>
             </div>
           </form>
 
           {/* Login Redirect */}
-          <div className="text-center mt-6"> {/* Increased mt for spacing */}
+          <div className="text-center mt-6 text-gray-500 dark:text-gray-400">
             <span className="text-sm">
               Already have an account?{' '}
-              <NavLink to="/login" className="link link-primary">
+              <NavLink to="/login" className="link link-primary font-medium">
                 Login
               </NavLink>
             </span>

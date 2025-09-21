@@ -65,63 +65,77 @@ const waiting = async(timer)=>{
 // ["db54881d-bcf5-4c7b-a2e3-d33fe7e25de7","ecc52a9b-ea80-4a00-ad50-4ab6cc3bb2a1","1b35ec3b-5776-48ef-b646-d5522bdeb2cc"]
 
 const submitToken = async(resultToken)=>{
+  const maxAttempts = 30; // Maximum 30 seconds timeout
+  let attempts = 0;
 
-const options = {
-  method: 'GET',
-  url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
-  params: {
-    tokens: resultToken.join(","),
-    base64_encoded: 'false',
-    fields: '*'
-  },
-  headers: {
-    'x-rapidapi-key': process.env.JUDGE0_KEY,
-    'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
+  const options = {
+    method: 'GET',
+    url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+    params: {
+      tokens: resultToken.join(","),
+      base64_encoded: 'false',
+      fields: '*'
+    },
+    headers: {
+      'x-rapidapi-key': process.env.JUDGE0_KEY,
+      'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
+    }
+  };
+
+  async function fetchData() {
+    try {
+      const response = await axios.request(options);
+      return response.data;
+    } catch (error) {
+      console.error('Judge0 API Error:', error.response?.data || error.message);
+      
+      // Handle rate limiting
+      if (error.response?.status === 429) {
+        throw new Error('Judge0 API rate limit exceeded. Please try again in a few minutes.');
+      }
+      
+      // Handle other API errors
+      if (error.response?.status >= 400) {
+        throw new Error('Judge0 API service temporarily unavailable. Please try again later.');
+      }
+      
+      throw new Error('Failed to get results from Judge0. Please try again.');
+    }
   }
-};
 
-async function fetchData() {
-	try {
-		const response = await axios.request(options);
-		return response.data;
-	} catch (error) {
-		console.error('Judge0 API Error:', error.response?.data || error.message);
-		
-		// Handle rate limiting
-		if (error.response?.status === 429) {
-			throw new Error('Judge0 API rate limit exceeded. Please try again in a few minutes.');
-		}
-		
-		// Handle other API errors
-		if (error.response?.status >= 400) {
-			throw new Error('Judge0 API service temporarily unavailable. Please try again later.');
-		}
-		
-		throw new Error('Failed to get results from Judge0. Please try again.');
-	}
-}
+  while(attempts < maxAttempts){
+    try {
+      const result = await fetchData();
 
+      // Check if result and result.submissions exist
+      if (!result || !result.submissions) {
+        throw new Error('Invalid response from Judge0 API. Please try again.');
+      }
 
- while(true){
+      const IsResultObtained = result.submissions.every((r)=>r.status_id>2);
 
- const result =  await fetchData();
+      if(IsResultObtained) {
+        return result.submissions;
+      }
 
- // Check if result and result.submissions exist
- if (!result || !result.submissions) {
-   throw new Error('Invalid response from Judge0 API. Please try again.');
- }
+      attempts++;
+      await waiting(1000);
+    } catch (error) {
+      // If it's an API error, throw it immediately
+      if (error.message.includes('Judge0 API') || error.message.includes('rate limit') || error.message.includes('service temporarily unavailable')) {
+        throw error;
+      }
+      
+      // For other errors, continue polling but increment attempts
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new Error('Code execution timeout. Please try again with simpler code.');
+      }
+      await waiting(1000);
+    }
+  }
 
-  const IsResultObtained =  result.submissions.every((r)=>r.status_id>2);
-
-  if(IsResultObtained)
-    return result.submissions;
-
-  
-  await waiting(1000);
-}
-
-
-
+  throw new Error('Code execution timeout. Please try again with simpler code.');
 }
 
 
