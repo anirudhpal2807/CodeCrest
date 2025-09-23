@@ -1,5 +1,7 @@
 const express = require('express')
 const app = express();
+// Required for trusting X-Forwarded-* headers on Render so Secure cookies work
+app.set('trust proxy', 1);
 require('dotenv').config();
 const main =  require('./config/db')
 const cookieParser =  require('cookie-parser');
@@ -15,29 +17,14 @@ const cors = require('cors')
 
 // CORS configuration for production deployment
 const corsOptions = {
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        // Allow all origins in production
-        if (process.env.NODE_ENV === 'production') {
-            return callback(null, true);
-        }
-        
-        // For development, allow localhost
-        const allowedOrigins = [
+    origin: process.env.NODE_ENV === 'production'
+        ? ['https://codecrest-frontend.onrender.com']
+        : [
             'http://localhost:3000',
             'http://localhost:5173',
             'http://127.0.0.1:3000',
             'http://127.0.0.1:5173'
-        ];
-        
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(null, true); // Allow all for now
-        }
-    },
+        ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
