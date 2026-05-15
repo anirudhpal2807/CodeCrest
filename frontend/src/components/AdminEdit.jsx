@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, NavLink } from 'react-router-dom';
+import { ArrowLeft, AlertCircle, Save } from 'lucide-react';
 import axiosClient from '../utils/axiosClient';
+import { useToast } from './Toast';
 
-function AdminEdit(){
+function AdminEdit() {
   const { problemId } = useParams();
   const navigate = useNavigate();
 
@@ -16,17 +18,18 @@ function AdminEdit(){
     startCode: [
       { language: 'C++', initialCode: '' },
       { language: 'Java', initialCode: '' },
-      { language: 'JavaScript', initialCode: '' }
+      { language: 'JavaScript', initialCode: '' },
     ],
     referenceSolution: [
       { language: 'C++', completeCode: '' },
       { language: 'Java', completeCode: '' },
-      { language: 'JavaScript', completeCode: '' }
-    ]
+      { language: 'JavaScript', completeCode: '' },
+    ],
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const { showToast, ToastContainer } = useToast();
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -41,7 +44,7 @@ function AdminEdit(){
           visibleTestCases: data.visibleTestCases || [],
           hiddenTestCases: data.hiddenTestCases || [],
           startCode: data.startCode || form.startCode,
-          referenceSolution: data.referenceSolution || form.referenceSolution
+          referenceSolution: data.referenceSolution || form.referenceSolution,
         });
       } catch (err) {
         setError('Failed to load problem');
@@ -65,11 +68,13 @@ function AdminEdit(){
     setError(null);
     try {
       await axiosClient.put(`/problem/update/${problemId}`, form);
-      alert('Problem updated successfully');
-      navigate('/admin/update');
+      showToast('Problem updated successfully!', 'success');
+      setTimeout(() => navigate('/admin/update'), 1500);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || 'Failed to update');
+      const errMsg = err.response?.data?.message || err.response?.data || 'Failed to update';
+      setError(errMsg);
+      showToast(String(errMsg), 'error', 4000);
     } finally {
       setSaving(false);
     }
@@ -77,59 +82,126 @@ function AdminEdit(){
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="min-h-screen bg-[var(--cc-bg-primary)] flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-[var(--cc-primary)]"></span>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">Edit Problem</h1>
+    <div className="min-h-screen bg-[var(--cc-bg-primary)]">
+      <ToastContainer />
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Header */}
+        <NavLink
+          to="/admin/update"
+          className="inline-flex items-center gap-2 text-[var(--cc-text-secondary)] hover:text-[var(--cc-text-primary)] transition-colors mb-8"
+        >
+          <ArrowLeft size={18} />
+          <span className="text-sm font-medium">Back to Problems</span>
+        </NavLink>
 
-      {error && (
-        <div className="alert alert-error mb-4">
-          <span>{String(error)}</span>
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold text-[var(--cc-text-primary)] mb-2">
+            Edit Problem
+          </h1>
+          <p className="text-[var(--cc-text-secondary)]">
+            Update the details for this problem
+          </p>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="form-control">
-          <label className="label"><span className="label-text">Title</span></label>
-          <input name="title" className="input input-bordered" value={form.title} onChange={handleChange} />
-        </div>
-        <div className="form-control">
-          <label className="label"><span className="label-text">Description</span></label>
-          <textarea name="description" className="textarea textarea-bordered h-40" value={form.description} onChange={handleChange} />
-        </div>
-        <div className="flex gap-4">
-          <div className="form-control w-1/2">
-            <label className="label"><span className="label-text">Difficulty</span></label>
-            <select name="difficulty" className="select select-bordered" value={form.difficulty} onChange={handleChange}>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
+        {/* Error alert */}
+        {error && (
+          <div className="mb-6 flex items-center gap-3 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.25)] rounded-xl px-5 py-4">
+            <AlertCircle size={20} className="text-[var(--cc-error)] shrink-0" />
+            <p className="text-sm text-[#f87171]">{String(error)}</p>
           </div>
-          <div className="form-control w-1/2">
-            <label className="label"><span className="label-text">Tag</span></label>
-            <select name="tags" className="select select-bordered" value={form.tags} onChange={handleChange}>
-              <option value="array">Array</option>
-              <option value="linkedList">Linked List</option>
-              <option value="graph">Graph</option>
-              <option value="dp">DP</option>
-            </select>
-          </div>
-        </div>
+        )}
 
-        <button type="submit" className={`btn btn-primary ${saving ? 'loading' : ''}`} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <section className="cc-card p-6 space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-[var(--cc-text-secondary)] mb-1.5">
+                Title
+              </label>
+              <input
+                name="title"
+                className="cc-input w-full"
+                value={form.title}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[var(--cc-text-secondary)] mb-1.5">
+                Description
+              </label>
+              <textarea
+                name="description"
+                rows={6}
+                className="cc-input w-full resize-y"
+                value={form.description}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-[var(--cc-text-secondary)] mb-1.5">
+                  Difficulty
+                </label>
+                <select
+                  name="difficulty"
+                  className="cc-input w-full"
+                  value={form.difficulty}
+                  onChange={handleChange}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--cc-text-secondary)] mb-1.5">
+                  Tag
+                </label>
+                <select
+                  name="tags"
+                  className="cc-input w-full"
+                  value={form.tags}
+                  onChange={handleChange}
+                >
+                  <option value="array">Array</option>
+                  <option value="linkedList">Linked List</option>
+                  <option value="graph">Graph</option>
+                  <option value="dp">DP</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="cc-btn-primary w-full text-base py-3 inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? (
+              <>
+                <span className="loading loading-spinner loading-sm"></span>
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save size={18} />
+                Save Changes
+              </>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
 
 export default AdminEdit;
-
-

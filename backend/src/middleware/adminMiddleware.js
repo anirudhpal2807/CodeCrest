@@ -8,20 +8,20 @@ const adminMiddleware = async (req,res,next)=>{
        
         const {token} = req.cookies;
         if(!token)
-            throw new Error("Token is not persent");
+            throw new Error("Authentication required: No token present");
 
         const payload = jwt.verify(token,process.env.JWT_KEY);
 
         const {_id} = payload;
 
         if(!_id){
-            throw new Error("Invalid token");
+            throw new Error("Invalid token: Token payload missing user ID");
         }
 
         const result = await User.findById(_id);
 
         if(payload.role!='admin')
-            throw new Error("Invalid Token");
+            throw new Error("Access denied: Admin privileges required");
 
         if(!result){
             throw new Error("User Doesn't Exist");

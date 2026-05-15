@@ -2,26 +2,27 @@ import React from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  background: theme.palette.background.paper,
-  borderRadius: theme.spacing(2),
-  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-  transition: 'all 0.3s ease',
-  border: `1px solid ${theme.palette.grey[200]}`,
+const StyledCard = styled(Card)(() => ({
+  background: '#151c2c',
+  borderRadius: '14px',
+  boxShadow: '0 4px 24px rgba(0, 0, 0, 0.25)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  border: '1px solid rgba(148, 163, 184, 0.12)',
+  overflow: 'visible',
   '&:hover': {
     transform: 'translateY(-4px)',
-    boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-  }
+    boxShadow: '0 12px 36px rgba(0, 0, 0, 0.4)',
+    borderColor: 'rgba(148, 163, 184, 0.25)',
+  },
 }));
 
-const IconContainer = styled(Box)(({ theme }) => ({
+const IconContainer = styled(Box)(() => ({
   width: 48,
   height: 48,
-  borderRadius: theme.spacing(1.5),
+  borderRadius: '10px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  marginBottom: theme.spacing(2)
 }));
 
 interface StatsCardProps {
@@ -33,44 +34,55 @@ interface StatsCardProps {
   progress?: number;
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ 
-  title, 
-  value, 
-  subtitle, 
-  icon, 
+const colorMap: Record<string, string> = {
+  primary: '#6366f1',
+  secondary: '#10b981',
+  error: '#ef4444',
+  warning: '#f59e0b',
+  info: '#3b82f6',
+  success: '#10b981',
+};
+
+const StatsCard: React.FC<StatsCardProps> = ({
+  title,
+  value,
+  subtitle,
+  icon,
   color,
-  progress 
+  progress,
 }) => {
-  const getColorValue = (colorName: string) => {
-    const colorMap: Record<string, string> = {
-      primary: '#6366f1',
-      secondary: '#10b981',
-      error: '#ef4444',
-      warning: '#f59e0b',
-      info: '#3b82f6',
-      success: '#10b981'
-    };
-    return colorMap[colorName] || colorMap.primary;
-  };
+  const colorValue = colorMap[color] || colorMap.primary;
 
   return (
     <StyledCard>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <IconContainer sx={{ backgroundColor: `${getColorValue(color)}15` }}>
-            <Box sx={{ color: getColorValue(color) }}>
-              {icon}
-            </Box>
+      <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 2,
+          }}
+        >
+          <IconContainer sx={{ backgroundColor: `${colorValue}18` }}>
+            <Box sx={{ color: colorValue, display: 'flex' }}>{icon}</Box>
           </IconContainer>
-          
+
           {progress !== undefined && (
             <Box sx={{ position: 'relative', display: 'inline-flex' }}>
               <CircularProgress
                 variant="determinate"
+                value={100}
+                size={44}
+                thickness={3.5}
+                sx={{ color: 'rgba(148, 163, 184, 0.12)', position: 'absolute' }}
+              />
+              <CircularProgress
+                variant="determinate"
                 value={progress}
-                size={40}
-                thickness={4}
-                sx={{ color: getColorValue(color) }}
+                size={44}
+                thickness={3.5}
+                sx={{ color: colorValue }}
               />
               <Box
                 sx={{
@@ -84,24 +96,58 @@ const StatsCard: React.FC<StatsCardProps> = ({
                   justifyContent: 'center',
                 }}
               >
-                <Typography variant="caption" component="div" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                <Typography
+                  variant="caption"
+                  component="div"
+                  sx={{
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    color: '#f1f5f9',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                  }}
+                >
                   {`${Math.round(progress)}%`}
                 </Typography>
               </Box>
             </Box>
           )}
         </Box>
-        
-        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
+
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            color: '#f1f5f9',
+            mb: 0.5,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            letterSpacing: '-0.02em',
+          }}
+        >
           {value}
         </Typography>
-        
-        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, mb: 0.5 }}>
+
+        <Typography
+          variant="body2"
+          sx={{
+            color: '#94a3b8',
+            fontWeight: 500,
+            mb: 0.25,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: '0.85rem',
+          }}
+        >
           {title}
         </Typography>
-        
+
         {subtitle && (
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#64748b',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: '0.75rem',
+            }}
+          >
             {subtitle}
           </Typography>
         )}

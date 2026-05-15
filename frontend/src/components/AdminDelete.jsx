@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
-import axiosClient from '../utils/axiosClient'
+import { NavLink } from 'react-router-dom';
+import { ArrowLeft, Trash2, AlertCircle } from 'lucide-react';
+import axiosClient from '../utils/axiosClient';
+
+function getDifficultyBadge(difficulty) {
+  const d = (difficulty || '').toLowerCase();
+  if (d === 'easy') return 'cc-badge-easy';
+  if (d === 'medium') return 'cc-badge-medium';
+  return 'cc-badge-hard';
+}
 
 const AdminDelete = () => {
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
 
   useEffect(() => {
     fetchProblems();
@@ -26,90 +34,118 @@ const AdminDelete = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this problem?')) return;
-    
+
     try {
       await axiosClient.delete(`/problem/delete/${id}`);
-      setProblems(problems.filter(problem => problem._id !== id));
+      setProblems(problems.filter((problem) => problem._id !== id));
     } catch (err) {
       setError('Failed to delete problem');
       console.error(err);
     }
   };
 
-
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="alert alert-error shadow-lg my-4">
-        <div>
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{error}</span>
-        </div>
+      <div className="min-h-screen bg-[var(--cc-bg-primary)] flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-[var(--cc-primary)]"></span>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Delete Problems</h1>
-      </div>
+    <div className="min-h-screen bg-[var(--cc-bg-primary)]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Header */}
+        <NavLink
+          to="/admin"
+          className="inline-flex items-center gap-2 text-[var(--cc-text-secondary)] hover:text-[var(--cc-text-primary)] transition-colors mb-8"
+        >
+          <ArrowLeft size={18} />
+          <span className="text-sm font-medium">Back to Admin</span>
+        </NavLink>
 
-      <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr>
-              <th className="w-1/12">#</th>
-              <th className="w-4/12">Title</th>
-              <th className="w-2/12">Difficulty</th>
-              <th className="w-3/12">Tags</th>
-              <th className="w-2/12">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {problems.map((problem, index) => (
-              <tr key={problem._id}>
-                <th>{index + 1}</th>
-                <td>{problem.title}</td>
-                <td>
-                  <span className={`badge ${
-                    problem.difficulty === 'Easy' 
-                      ? 'badge-success' 
-                      : problem.difficulty === 'Medium' 
-                        ? 'badge-warning' 
-                        : 'badge-error'
-                  }`}>
-                    {problem.difficulty}
-                  </span>
-                </td>
-                <td>
-                  <span className="badge badge-outline">
-                    {problem.tags}
-                  </span>
-                </td>
-                <td>
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={() => handleDelete(problem._id)}
-                      className="btn btn-sm btn-error"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[var(--cc-text-primary)] mb-2">
+            Delete Problems
+          </h1>
+          <p className="text-[var(--cc-text-secondary)]">
+            Select a problem to permanently remove it from the platform
+          </p>
+        </div>
+
+        {/* Error alert */}
+        {error && (
+          <div className="mb-6 flex items-center gap-3 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.25)] rounded-xl px-5 py-4">
+            <AlertCircle size={20} className="text-[var(--cc-error)] shrink-0" />
+            <p className="text-sm text-[#f87171]">{error}</p>
+          </div>
+        )}
+
+        {/* Table */}
+        <div className="cc-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[var(--cc-bg-secondary)]">
+                  <th className="text-left text-xs font-semibold text-[var(--cc-text-muted)] uppercase tracking-wider px-6 py-4 w-16">
+                    #
+                  </th>
+                  <th className="text-left text-xs font-semibold text-[var(--cc-text-muted)] uppercase tracking-wider px-6 py-4">
+                    Title
+                  </th>
+                  <th className="text-left text-xs font-semibold text-[var(--cc-text-muted)] uppercase tracking-wider px-6 py-4 w-32">
+                    Difficulty
+                  </th>
+                  <th className="text-left text-xs font-semibold text-[var(--cc-text-muted)] uppercase tracking-wider px-6 py-4 w-40">
+                    Tags
+                  </th>
+                  <th className="text-right text-xs font-semibold text-[var(--cc-text-muted)] uppercase tracking-wider px-6 py-4 w-32">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--cc-border)]">
+                {problems.map((problem, index) => (
+                  <tr
+                    key={problem._id}
+                    className="hover:bg-[var(--cc-bg-elevated)] transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm text-[var(--cc-text-muted)]">
+                      {index + 1}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-[var(--cc-text-primary)]">
+                      {problem.title}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`cc-badge ${getDifficultyBadge(problem.difficulty)}`}>
+                        {problem.difficulty}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="cc-badge cc-badge-primary">{problem.tags}</span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDelete(problem._id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-[#f87171] bg-[rgba(239,68,68,0.1)] hover:bg-[rgba(239,68,68,0.2)] border border-[rgba(239,68,68,0.2)] transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {problems.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-[var(--cc-text-muted)]">
+                      No problems found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

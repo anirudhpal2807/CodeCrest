@@ -11,14 +11,17 @@ const solveDoubt = async(req, res) => {
             });
         }
 
-        if (!process.env.GEMINI_KEY) {
+        if (!process.env.GEMINI_KEY || !String(process.env.GEMINI_KEY).trim()) {
             return res.status(500).json({
-                message: "AI service configuration error"
+                message: "AI service configuration error: set GEMINI_KEY in backend/.env"
             });
         }
 
-        const ai = new GoogleGenerativeAI(process.env.GEMINI_KEY);
-        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const ai = new GoogleGenerativeAI(process.env.GEMINI_KEY.trim());
+        const modelId = (
+          process.env.GEMINI_MODEL || "gemini-2.0-flash"
+        ).trim();
+        const model = ai.getGenerativeModel({ model: modelId });
 
         // Convert messages to the format expected by Gemini
         const formattedMessages = messages.map(msg => {
@@ -79,7 +82,15 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
 
         const result = await chat.sendMessage(lastMessage.parts[0].text);
         const response = await result.response;
-        const text = response.text();
+        let text = "";
+        try {
+            text =
+                typeof response?.text === "function" ? response.text() : "";
+        } catch (textErr) {
+            console.error("Gemini empty/blocked response:", textErr?.message || textErr);
+            text =
+                "No reply text returned (blocked, empty, or quota). Try rephrasing or check your Gemini quota.";
+        }
 
         res.status(200).json({
             message: text
@@ -87,8 +98,23 @@ Remember: Your goal is to help users learn and understand DSA concepts through t
 
     } catch(err) {
         console.error("AI Chat Error:", err);
+        const msg = String(err?.message ?? err ?? "");
+        const keyInvalid =
+          /API[\s_-]?KEY|API_KEY_INVALID|valid API key|not found/i.test(msg);
+
+        if (keyInvalid) {
+            return res.status(503).json({
+                message:
+                    "Gemini API key invalid or missing. Set GEMINI_KEY in backend/.env (Google AI Studio) and restart the server. Optional: GEMINI_MODEL (default gemini-2.0-flash).",
+                code: "GEMINI_KEY_INVALID"
+            });
+        }
+
         res.status(500).json({
-            message: "AI service temporarily unavailable. Please try again later."
+            message:
+                msg.length < 280
+                  ? msg
+                  : "AI service temporarily unavailable. Please try again later."
         });
     }
 }

@@ -3,6 +3,20 @@ const Submission = require("../models/submission");
 const User = require("../models/user");
 const {getLanguageById,submitBatch,submitToken} = require("../utils/problemUtility");
 
+function firstJudge0FailureSummary(testResult) {
+  if (!Array.isArray(testResult)) return null;
+  for (const t of testResult) {
+    if (!t || t.status_id === 3) continue;
+    const fromFields = [t.compile_output, t.stderr, t.message].find(
+      (x) => x != null && String(x).trim()
+    );
+    if (fromFields) return String(fromFields).trim();
+    if (t.status && t.status.description)
+      return String(t.status.description);
+  }
+  return null;
+}
+
 const submitCode = async (req,res)=>{
    
     // 
@@ -62,6 +76,9 @@ const submitCode = async (req,res)=>{
         
         let statusCode = 503;
         let errorMessage = 'Code execution service is temporarily unavailable. Please try again later.';
+        if (error.message && (error.message.includes('JUDGE0_KEY') || error.message.includes('API key is missing') || error.message.includes('rejected the request'))) {
+          errorMessage = error.message;
+        }
         
         if (error.message.includes('rate limit')) {
           statusCode = 429;
@@ -224,6 +241,9 @@ const runCode = async(req,res)=>{
       
       let statusCode = 503;
       let errorMessage = 'Code execution service is temporarily unavailable. Please try again later.';
+      if (error.message && (error.message.includes('JUDGE0_KEY') || error.message.includes('API key is missing') || error.message.includes('rejected the request'))) {
+        errorMessage = error.message;
+      }
       
       if (error.message.includes('rate limit')) {
         statusCode = 429;
@@ -265,14 +285,17 @@ const runCode = async(req,res)=>{
        }else{
          if(test.status_id==4){
            status = false
-           errorMessage = test.stderr
+           errorMessage = test.stderr || test.compile_output || test.message
          }
          else{
            status = false
-           errorMessage = test.stderr
+           errorMessage = test.stderr || test.compile_output || test.message
          }
        }
    }
+
+  const failureSummary = !status ? firstJudge0FailureSummary(testResult) : null;
+  const userFacingError = failureSummary || errorMessage;
 
   
   
@@ -280,7 +303,10 @@ const runCode = async(req,res)=>{
    success:status,
    testCases: testResult,
    runtime,
-   memory
+   memory,
+   ...(userFacingError
+     ? { error: userFacingError, message: userFacingError }
+     : {}),
   });
      
   }

@@ -166,5 +166,54 @@ const deleteProfile = async(req,res)=>{
     }
 }
 
+// Development-only: Promote user to admin (requires authentication but not admin role)
+const promoteToAdmin = async(req,res)=>{
+    try{
+        // Only allow in development mode
+        if(process.env.NODE_ENV === 'production'){
+            return res.status(403).send("This endpoint is only available in development mode");
+        }
 
-module.exports = {register, login,logout,adminRegister,deleteProfile};
+        const userId = req.result._id;
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { role: 'admin' },
+            { new: true }
+        );
+
+        if(!user){
+            throw new Error("User not found");
+        }
+
+        // Generate new token with admin role
+        const token = jwt.sign(
+            {_id: user._id, emailId: user.emailId, role: 'admin'},
+            process.env.JWT_KEY,
+            {expiresIn: 60*60}
+        );
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            maxAge: 60 * 60 * 1000
+        });
+
+        res.status(200).json({
+            message: "User promoted to admin successfully",
+            user: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                emailId: user.emailId,
+                _id: user._id,
+                role: user.role
+            }
+        });
+    }
+    catch(err){
+        res.status(400).send("Error: " + err.message);
+    }
+}
+
+
+module.exports = {register, login,logout,adminRegister,deleteProfile,promoteToAdmin};

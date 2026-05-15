@@ -11,6 +11,7 @@ const problemRouter = require("./routes/problemCreator");
 const submitRouter = require("./routes/submit")
 const aiRouter = require("./routes/aiChatting")
 const videoRouter = require("./routes/videoCreator");
+const contestRouter = require("./routes/contestRoutes");
 const cors = require('cors')
 
 // console.log("Hello")
@@ -21,9 +22,13 @@ const corsOptions = {
         ? ['https://codecrest-frontend.onrender.com']
         : [
             'http://localhost:3000',
+            'http://localhost:3001',
             'http://localhost:5173',
+            'http://localhost:5174',
             'http://127.0.0.1:3000',
-            'http://127.0.0.1:5173'
+            'http://127.0.0.1:3001',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5174'
         ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -66,6 +71,7 @@ app.use('/problem',problemRouter);
 app.use('/submission',submitRouter);
 app.use('/ai',aiRouter);
 app.use("/video",videoRouter);
+app.use('/contest', contestRouter);
 
 
 const InitalizeConnection = async ()=>{

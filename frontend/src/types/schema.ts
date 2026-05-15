@@ -13,6 +13,8 @@ export interface Problem {
   difficulty: 'easy' | 'medium' | 'hard';
   tags: 'array' | 'linkedList' | 'graph' | 'dp';
   description: string;
+  problemTitle?: string;
+  problemDescription?: string;
 }
 
 export interface SolvedProblem {

@@ -23,7 +23,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, NavLink } from 'react-router';
+import { useNavigate, NavLink } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
 import PersonIcon from '@mui/icons-material/Person';
@@ -136,7 +136,7 @@ const Header: React.FC = () => {
     return `${firstLetter}${lastLetter}`.toUpperCase();
   };
 
-  const navItems = ['Problems', 'Contest', 'Discuss', 'Interview'];
+  const navItems = ['Problems', 'Contest', 'Interview'];
 
   const drawer = (
     <Stack sx={{ width: 250, p: 2, bgcolor: 'background.paper', height: '100%' }}>
